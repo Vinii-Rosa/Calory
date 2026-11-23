@@ -1,0 +1,8 @@
+{
+  "watch": [
+    "serve.ts", "db.ts", "routes", "controllers",
+    "middleware", "config", "utils", "jobs"
+  ],
+  "ext": "ts",
+  "ignore": ["test/**", "node_modules/**", "**/*.test.ts"]
+}

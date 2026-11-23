@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+  OTHER
+}
+
+enum MealStatus {
+  PLANNED
+  EATEN
+}
+
+model users {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  name       String
+  email      String   @unique
+  password   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  settings     user_settings?
+  api_tokens   api_tokens[]
+  meals        meals[]
+  water_logs   water_logs[]
+  workouts     workouts[]
+  recipes      recipes[]
+}
+
+model api_tokens {
+  id           String    @id @default(uuid()) @db.VarChar(36)
+  user_id      String    @db.VarChar(36)
+  name         String
+  token_hash   String    @unique
+  last_used_at DateTime?
+  revoked_at   DateTime?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model user_settings {
+  id            String   @id @default(uuid()) @db.VarChar(36)
+  user_id       String   @unique @db.VarChar(36)
+  kcal_goal     Int?
+  protein_goal  Decimal? @db.Decimal(8, 2)
+  carbs_goal    Decimal? @db.Decimal(8, 2)
+  fat_goal      Decimal? @db.Decimal(8, 2)
+  water_goal_ml Int?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model meals {
+  id         String     @id @default(uuid()) @db.VarChar(36)
+  user_id    String     @db.VarChar(36)
+  date       DateTime   @db.Date
+  type       MealType   @default(OTHER)
+  status     MealStatus @default(PLANNED)
+  note       String?    @db.Text
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+
+  user  users        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  items meal_items[]
+
+  @@index([user_id, date])
+}
+
+model meal_items {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  meal_id    String   @db.VarChar(36)
+  recipe_id  String?  @db.VarChar(36)
+  name       String
+  quantity   Decimal  @db.Decimal(10, 2)
+  unit       String   @default("g")
+  kcal       Decimal  @db.Decimal(10, 2)
+  protein    Decimal  @default(0) @db.Decimal(10, 2)
+  carbs      Decimal  @default(0) @db.Decimal(10, 2)
+  fat        Decimal  @default(0) @db.Decimal(10, 2)
+  fiber      Decimal? @db.Decimal(10, 2)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  meal   meals    @relation(fields: [meal_id], references: [id], onDelete: Cascade)
+  recipe recipes? @relation(fields: [recipe_id], references: [id], onDelete: SetNull)
+
+  @@index([meal_id])
+  @@index([recipe_id])
+}
+
+model water_logs {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  user_id    String   @db.VarChar(36)
+  date       DateTime @db.Date
+  amount_ml  Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, date])
+}
+
+model workouts {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  user_id      String   @db.VarChar(36)
+  date         DateTime @db.Date
+  name         String
+  duration_min Int?
+  kcal_burned  Decimal? @db.Decimal(10, 2)
+  note         String?  @db.Text
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, date])
+}
+
+model recipes {
+  id              String   @id @default(uuid()) @db.VarChar(36)
+  user_id         String   @db.VarChar(36)
+  name            String
+  total_weight_g  Decimal  @db.Decimal(10, 2)
+  total_kcal      Decimal  @db.Decimal(10, 2)
+  total_protein   Decimal  @default(0) @db.Decimal(10, 2)
+  total_carbs     Decimal  @default(0) @db.Decimal(10, 2)
+  total_fat       Decimal  @default(0) @db.Decimal(10, 2)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  user        users                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  ingredients recipe_ingredients[]
+  meal_items  meal_items[]
+
+  @@index([user_id])
+}
+
+model recipe_ingredients {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  recipe_id  String   @db.VarChar(36)
+  name       String
+  quantity   Decimal  @db.Decimal(10, 2)
+  unit       String   @default("g")
+  kcal       Decimal  @db.Decimal(10, 2)
+  protein    Decimal  @default(0) @db.Decimal(10, 2)
+  carbs      Decimal  @default(0) @db.Decimal(10, 2)
+  fat        Decimal  @default(0) @db.Decimal(10, 2)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  recipe recipes @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+
+  @@index([recipe_id])
+}
