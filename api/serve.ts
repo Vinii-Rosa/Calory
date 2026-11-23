@@ -4,6 +4,9 @@ import cookie from '@fastify/cookie';
 import jwt from '@fastify/jwt';
 import db from './db.js';
 import { JWT_SECRET } from './config/jwt.js';
+import loginRoutes from './routes/login.js';
+import usersRoutes from './routes/users.js';
+import apiTokensRoutes from './routes/api_tokens.js';
 
 export const app = Fastify({ logger: true });
 const port = Number(process.env.PORT) || 3001;
@@ -21,6 +24,10 @@ await app.register(cors, {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 });
 await app.register(jwt, { secret: JWT_SECRET, cookie: { cookieName: 'refresh_token', signed: false } });
+
+await app.register(loginRoutes, { prefix: '/login' });
+await app.register(usersRoutes, { prefix: '/users' });
+await app.register(apiTokensRoutes, { prefix: '/api-tokens' });
 
 app.get('/health', async (_req, res) => {
   return res.status(200).send({ status: 'ok' });
