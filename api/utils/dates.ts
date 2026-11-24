@@ -14,3 +14,13 @@ export function formatDate(date: Date): string {
 export function todayDate(): Date {
   return parseDate(new Date().toISOString().slice(0, 10)) as Date;
 }
+
+export function addDays(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * 86400000);
+}
+
+// Segunda-feira da semana (seg–dom) que contém a data
+export function weekStart(date: Date): Date {
+  const offset = (date.getUTCDay() + 6) % 7;
+  return addDays(date, -offset);
+}
