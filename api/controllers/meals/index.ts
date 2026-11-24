@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import db from '../../db.js';
 import { addDays, formatDate, parseDate, todayDate, weekStart } from '../../utils/dates.js';
 import { sumItems } from '../../utils/nutrition.js';
+import { isInvalidOptional, isNonNegative } from '../../utils/validation.js';
 
 const MEAL_TYPES = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK', 'OTHER'];
 const MEAL_STATUSES = ['PLANNED', 'EATEN'];
@@ -52,14 +53,6 @@ function formatMeal(meal: any) {
     totals: sumItems(meal.items),
     created_at: meal.created_at,
   };
-}
-
-function isNonNegative(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
-}
-
-function isInvalidOptional(value: unknown): boolean {
-  return value !== undefined && !isNonNegative(value);
 }
 
 function validateItem(raw: ItemBody): string | null {

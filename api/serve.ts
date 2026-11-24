@@ -12,6 +12,7 @@ import waterRoutes from './routes/water.js';
 import workoutsRoutes from './routes/workouts.js';
 import mealsRoutes from './routes/meals.js';
 import summaryRoutes from './routes/summary.js';
+import recipesRoutes from './routes/recipes.js';
 
 export const app = Fastify({ logger: true });
 const port = Number(process.env.PORT) || 3001;
@@ -38,6 +39,7 @@ await app.register(waterRoutes, { prefix: '/water' });
 await app.register(workoutsRoutes, { prefix: '/workouts' });
 await app.register(mealsRoutes, { prefix: '/meals' });
 await app.register(summaryRoutes, { prefix: '/summary' });
+await app.register(recipesRoutes, { prefix: '/recipes' });
 
 app.get('/health', async (_req, res) => {
   return res.status(200).send({ status: 'ok' });
